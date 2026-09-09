@@ -81,7 +81,7 @@ jobs:
           terraform init
           terraform plan -out=tfplan
 
-      - name: Terraform Plan Production
+      - name: Terraform Plan Prod
         working-directory: environments/prod
         run: |
           terraform init
@@ -171,7 +171,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          role-to-assume: arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/GitHubActions-Terraform
+          role-to-assume: arn:aws:iam::940482413976:role/GitHubActions-Terraform
           aws-region: ap-south-1
 
       - name: Terraform Apply Prod
