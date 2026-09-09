@@ -13,6 +13,11 @@ permissions:
   contents: read
 
 jobs:
+
+  # ============================================================
+  # TERRAFORM CHECK
+  # ============================================================
+
   terraform-check:
     name: Terraform Check
     runs-on: ubuntu-latest
@@ -45,6 +50,11 @@ jobs:
           terraform init -backend=false
           terraform validate
 
+
+  # ============================================================
+  # TERRAFORM PLAN
+  # ============================================================
+
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
@@ -63,11 +73,21 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+
+      # ----------------------------------------------------------
+      # AWS AUTHENTICATION
+      # ----------------------------------------------------------
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::940482413976:role/GitHubActions-Terraform
           aws-region: ap-south-1
+
+
+      # ----------------------------------------------------------
+      # DEV PLAN
+      # ----------------------------------------------------------
 
       - name: Terraform Plan Dev
         working-directory: environments/dev
@@ -75,17 +95,53 @@ jobs:
           terraform init
           terraform plan -out=tfplan
 
+      - name: Upload Dev Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-dev
+          path: environments/dev/tfplan
+          retention-days: 1
+
+
+      # ----------------------------------------------------------
+      # STAGING PLAN
+      # ----------------------------------------------------------
+
       - name: Terraform Plan Staging
         working-directory: environments/staging
         run: |
           terraform init
           terraform plan -out=tfplan
 
+      - name: Upload Staging Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-staging
+          path: environments/staging/tfplan
+          retention-days: 1
+
+
+      # ----------------------------------------------------------
+      # PROD PLAN
+      # ----------------------------------------------------------
+
       - name: Terraform Plan Prod
         working-directory: environments/prod
         run: |
           terraform init
           terraform plan -out=tfplan
+
+      - name: Upload Prod Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-prod
+          path: environments/prod/tfplan
+          retention-days: 1
+
+
+  # ============================================================
+  # DEV APPLY
+  # ============================================================
 
   terraform-apply-dev:
     name: Terraform Apply Dev
@@ -106,17 +162,43 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+
+      # ----------------------------------------------------------
+      # AWS AUTHENTICATION
+      # ----------------------------------------------------------
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::940482413976:role/GitHubActions-Terraform
           aws-region: ap-south-1
 
+
+      # ----------------------------------------------------------
+      # DOWNLOAD EXACT PLAN
+      # ----------------------------------------------------------
+
+      - name: Download Dev Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-dev
+          path: environments/dev
+
+
+      # ----------------------------------------------------------
+      # APPLY EXACT PLAN
+      # ----------------------------------------------------------
+
       - name: Terraform Apply Dev
         working-directory: environments/dev
         run: |
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve tfplan
+
+
+  # ============================================================
+  # STAGING APPLY
+  # ============================================================
 
   terraform-apply-staging:
     name: Terraform Apply Staging
@@ -137,17 +219,43 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+
+      # ----------------------------------------------------------
+      # AWS AUTHENTICATION
+      # ----------------------------------------------------------
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::940482413976:role/GitHubActions-Terraform
           aws-region: ap-south-1
 
+
+      # ----------------------------------------------------------
+      # DOWNLOAD EXACT PLAN
+      # ----------------------------------------------------------
+
+      - name: Download Staging Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-staging
+          path: environments/staging
+
+
+      # ----------------------------------------------------------
+      # APPLY EXACT PLAN
+      # ----------------------------------------------------------
+
       - name: Terraform Apply Staging
         working-directory: environments/staging
         run: |
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve tfplan
+
+
+  # ============================================================
+  # PROD APPLY
+  # ============================================================
 
   terraform-apply-prod:
     name: Terraform Apply Prod
@@ -168,14 +276,35 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+
+      # ----------------------------------------------------------
+      # AWS AUTHENTICATION
+      # ----------------------------------------------------------
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::940482413976:role/GitHubActions-Terraform
           aws-region: ap-south-1
 
+
+      # ----------------------------------------------------------
+      # DOWNLOAD EXACT PLAN
+      # ----------------------------------------------------------
+
+      - name: Download Prod Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-prod
+          path: environments/prod
+
+
+      # ----------------------------------------------------------
+      # APPLY EXACT PLAN
+      # ----------------------------------------------------------
+
       - name: Terraform Apply Prod
         working-directory: environments/prod
         run: |
           terraform init
-          terraform apply -auto-approve
+          terraform apply -auto-approve tfplan
