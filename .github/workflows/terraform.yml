@@ -39,7 +39,7 @@ jobs:
           terraform init -backend=false
           terraform validate
 
-      - name: Terraform Validate Production
+      - name: Terraform Validate Prod
         working-directory: environments/prod
         run: |
           terraform init -backend=false
