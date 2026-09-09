@@ -9,10 +9,10 @@ terraform {
   }
 
   backend "s3" {
-        bucket = "terraform-aws-infrastructure-shiv-2026"
-        key        = "staging/terraform.tfstate"
-        region  = "ap-south-1"
-   }
+    bucket = "terraform-aws-infrastructure-shiv-2026"
+    key    = "staging/terraform.tfstate"
+    region = "ap-south-1"
+  }
 }
 provider "aws" {
   region = "ap-south-1"
