@@ -1,0 +1,1 @@
+state_bucket_name = "terraform-aws-infrastructure-shiv-2026"

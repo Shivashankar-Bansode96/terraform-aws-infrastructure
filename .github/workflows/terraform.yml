@@ -1,0 +1,46 @@
+name: Terraform
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  terraform-check:
+    name: Terraform Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate Dev
+        working-directory: environments/dev
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Terraform Validate Staging
+        working-directory: environments/staging
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Terraform Validate Production
+        working-directory: environments/prod
+        run: |
+          terraform init -backend=false
+          terraform validate
